@@ -9,10 +9,6 @@
     * { box-sizing: border-box; }
     body { margin: 0; }
     main { max-width: 1200px; margin: auto; padding: 40px 20px 80px; }
-    h1 { font-size: clamp(36px, 6vw, 68px); font-weight: 900; margin: 0 0 12px; letter-spacing: -0.04em; }
-    .intro { font-size: 22px; line-height: 1.5; margin: 0 0 28px; }
-    .controls { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 28px; }
-    .controls button { font: 700 20px system-ui; padding: 14px 20px; border: 2px solid #152b35; border-radius: 12px; background: white; cursor: pointer; }
     ol { list-style: none; padding: 0; display: grid; gap: 20px; }
     .sentence { width: 100%; text-align: left; border: 3px solid transparent; border-radius: 20px; background: white; color: #152b35; padding: clamp(22px, 4vw, 40px); box-shadow: 0 4px 18px #152b350c; cursor: pointer; }
     .sentence:hover { border-color: #328079; }
@@ -26,9 +22,6 @@
 </head>
 <body>
   <main>
-    <h1>Aubree's Spanish Practice</h1>
-    <p class="intro">Read a sentence in English. Click or tap it to see the Spanish. Click again to switch back.</p>
-    <div class="controls"><button id="english">All English</button><button id="spanish">All Spanish</button></div>
     <ol id="sentences" aria-label="Practice sentences"></ol>
     <footer>You can also use Tab to choose a sentence, then Enter or Space to flip it.</footer>
   </main>
@@ -61,11 +54,6 @@
       li.append(button);
       document.querySelector('#sentences').append(li);
     });
-    for (const [id, spanish] of [['english', false], ['spanish', true]]) {
-      document.getElementById(id).addEventListener('click', () => {
-        document.querySelectorAll('.sentence').forEach((button, index) => show(button, index, spanish));
-      });
-    }
   </script>
 </body>
 </html>
