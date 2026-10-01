@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Aubree's Spanish Practice</title>
+  <style>
+    :root { color-scheme: light; font-family: system-ui, sans-serif; background: #f5f3ee; color: #152b35; }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    main { max-width: 1200px; margin: auto; padding: 40px 20px 80px; }
+    h1 { font-size: clamp(36px, 6vw, 68px); font-weight: 900; margin: 0 0 12px; letter-spacing: -0.04em; }
+    .intro { font-size: 22px; line-height: 1.5; margin: 0 0 28px; }
+    .controls { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 28px; }
+    .controls button { font: 700 20px system-ui; padding: 14px 20px; border: 2px solid #152b35; border-radius: 12px; background: white; cursor: pointer; }
+    ol { list-style: none; padding: 0; display: grid; gap: 20px; }
+    .sentence { width: 100%; text-align: left; border: 3px solid transparent; border-radius: 20px; background: white; color: #152b35; padding: clamp(22px, 4vw, 40px); box-shadow: 0 4px 18px #152b350c; cursor: pointer; }
+    .sentence:hover { border-color: #328079; }
+    button:focus-visible { outline: 4px solid #d47a23; outline-offset: 5px; }
+    .sentence[aria-pressed="true"] { background: #e3f3ee; }
+    .label { display: block; font: 800 16px system-ui; text-transform: uppercase; letter-spacing: .12em; color: #456963; margin-bottom: 16px; }
+    .text { display: block; font: 800 clamp(32px, 4.5vw, 56px)/1.3 system-ui; }
+    footer { font-size: 18px; margin-top: 28px; }
+    @media (prefers-reduced-motion: no-preference) { .sentence { transition: background .15s, border-color .15s; } }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Aubree's Spanish Practice</h1>
+    <p class="intro">Read a sentence in English. Click or tap it to see the Spanish. Click again to switch back.</p>
+    <div class="controls"><button id="english">All English</button><button id="spanish">All Spanish</button></div>
+    <ol id="sentences" aria-label="Practice sentences"></ol>
+    <footer>You can also use Tab to choose a sentence, then Enter or Space to flip it.</footer>
+  </main>
+  <script>
+    const sentences = [
+      ["Good morning, class.", "Buenos días, clase."],
+      ["My name is Aubree.", "Me llamo Aubree."],
+      ["During my vacation, I went to Disneyland, where I rode an attraction called ‘Radiator Springs Racers’ in Cars Land.", "Durante mis vacaciones, fui a Disneyland, dónde me subí a una atracción llamada \"Radiator Springs Racers\" en ‘Cars Land’."],
+      ["Also, during my summer vacation, I went to San Diego with my parents and my dog on the Fourth of July and stayed at an elegant, dog-friendly, soundproof hotel that Bentley (my dog) likes because he cannot hear the fireworks, which he is sensitive to.", "También, fui a San Diego con mis padres y mi perro el cuatro de julio en un hotel elegante que admite perros y está insonorizado, y le gusta el hotel para que Bentley (mi perro) no oiga los fuegos artificiales, ya que es sensible a ellos durante mis vacaciones de verano."],
+      ["Also, I stayed with my family (my parents and my dog) during vacation.", "También, me quedé con mi familia (mis padres y mi perro) durante las vacaciones."],
+      ["Also, I generally went to Carlsbad with my dad so we could go to Legoland California Resort, where I went on many fantastic rides.", "También, generalmente, fui a Carlsbad con mi papá para que pudiéramos ir a Legoland California Resort, donde hice muchos recorridos fantásticos."],
+      ["Also, I got up at nine or ten during my vacation.", "También, me levanté a las nueve o a las diez durante mis vacaciones."],
+      ["Also, what I liked most during my vacation was going to amusement parks.", "También, me gustaba más ir a parques de atracciones durante mis vacaciones."]
+    ];
+    function show(button, index, spanish) {
+      button.setAttribute('aria-pressed', String(spanish));
+      button.querySelector('.label').textContent = `${index + 1} / ${sentences.length} · ${spanish ? 'Spanish' : 'English'} · Click to flip`;
+      const text = button.querySelector('.text');
+      text.lang = spanish ? 'es' : 'en';
+      text.textContent = sentences[index][spanish ? 1 : 0];
+    }
+    sentences.forEach((pair, index) => {
+      const li = document.createElement('li');
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'sentence';
+      button.innerHTML = '<span class="label"></span><span class="text"></span>';
+      show(button, index, false);
+      button.addEventListener('click', () => show(button, index, button.getAttribute('aria-pressed') !== 'true'));
+      li.append(button);
+      document.querySelector('#sentences').append(li);
+    });
+    for (const [id, spanish] of [['english', false], ['spanish', true]]) {
+      document.getElementById(id).addEventListener('click', () => {
+        document.querySelectorAll('.sentence').forEach((button, index) => show(button, index, spanish));
+      });
+    }
+  </script>
+</body>
+</html>
