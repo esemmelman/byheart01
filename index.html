@@ -17,11 +17,16 @@
     .label { display: block; font: 800 16px system-ui; text-transform: uppercase; letter-spacing: .12em; color: #456963; margin-bottom: 16px; }
     .text { display: block; font: 800 clamp(32px, 4.5vw, 56px)/1.3 system-ui; }
     footer { font-size: 18px; margin-top: 28px; }
+    .audio { border: 0; border-radius: 12px; padding: 14px 28px; background: #328079; color: white; font: 700 20px system-ui; cursor: pointer; }
+    .audio:disabled { opacity: .6; cursor: default; }
+    .audio-status { margin-left: 16px; }
     @media (prefers-reduced-motion: no-preference) { .sentence { transition: background .15s, border-color .15s; } }
   </style>
 </head>
 <body>
   <main>
+    <button id="audio" class="audio" type="button" aria-pressed="false">audio</button>
+    <span id="audio-status" class="audio-status" role="status"></span>
     <ol id="sentences" aria-label="Practice sentences"></ol>
     <footer>You can also use Tab to choose a sentence, then Enter or Space to flip it.</footer>
   </main>
@@ -36,6 +41,56 @@
       ["Also, I got up at nine or ten during my vacation.", "También, me levanté a las nueve o a las diez durante mis vacaciones."],
       ["Also, what I liked most during my vacation was going to amusement parks.", "También, me gustaba más ir a parques de atracciones durante mis vacaciones."]
     ];
+    const audioButton = document.querySelector('#audio');
+    const audioStatus = document.querySelector('#audio-status');
+    let playing = false;
+    let playbackId = 0;
+    function stopAudio(message = '') {
+      playing = false;
+      playbackId++;
+      window.speechSynthesis.cancel();
+      audioButton.setAttribute('aria-pressed', 'false');
+      audioStatus.textContent = message;
+    }
+    function speakSentence(index, id) {
+      if (!playing || id !== playbackId) return;
+      if (index === sentences.length) {
+        stopAudio('Finished.');
+        return;
+      }
+      const utterance = new SpeechSynthesisUtterance(sentences[index][1]);
+      utterance.lang = 'es-ES';
+      utterance.rate = 0.7;
+      const spanishVoice = window.speechSynthesis.getVoices().find(voice => voice.lang.toLowerCase().startsWith('es'));
+      if (spanishVoice) {
+        utterance.voice = spanishVoice;
+        utterance.lang = spanishVoice.lang;
+      }
+      audioStatus.textContent = `Reading Spanish sentence ${index + 1} of ${sentences.length}. Click audio to stop.`;
+      utterance.onend = () => {
+        if (playing && id === playbackId) setTimeout(() => speakSentence(index + 1, id), 600);
+      };
+      utterance.onerror = () => {
+        if (playing && id === playbackId) stopAudio('Audio could not play. Please try again.');
+      };
+      window.speechSynthesis.speak(utterance);
+    }
+    if ('speechSynthesis' in window && 'SpeechSynthesisUtterance' in window) {
+      audioButton.addEventListener('click', () => {
+        if (playing) {
+          stopAudio('Stopped.');
+          return;
+        }
+        window.speechSynthesis.cancel();
+        playing = true;
+        audioButton.setAttribute('aria-pressed', 'true');
+        speakSentence(0, ++playbackId);
+      });
+      window.addEventListener('pagehide', () => stopAudio());
+    } else {
+      audioButton.disabled = true;
+      audioStatus.textContent = 'Audio is unavailable in this browser.';
+    }
     function show(button, index, spanish) {
       button.setAttribute('aria-pressed', String(spanish));
       button.querySelector('.label').textContent = `${index + 1} / ${sentences.length} · ${spanish ? 'Spanish' : 'English'} · Click to flip`;
